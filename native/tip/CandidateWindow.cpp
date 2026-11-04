@@ -529,6 +529,14 @@ void CandidateWindow::ReleaseFactories() {
     g_d2d = nullptr;
 }
 
+bool CandidateWindow::SharedFactories(ID2D1Factory** d2d, IDWriteFactory** dwrite) {
+    if (d2d == nullptr || dwrite == nullptr || !EnsureFactories()) return false;
+    std::lock_guard<std::mutex> lock(g_factoryMutex);
+    *d2d = g_d2d;
+    *dwrite = g_dwrite;
+    return *d2d != nullptr && *dwrite != nullptr;
+}
+
 static bool EnsureClasses() {
     std::call_once(g_classOnce, [] {
     WNDCLASSEXW wc = {sizeof(wc)};

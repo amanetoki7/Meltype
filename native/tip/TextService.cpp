@@ -709,6 +709,16 @@ void TextService::UpdateLangBar() {
     if (langBar_ != nullptr) langBar_->Update();
 }
 
+void TextService::RefreshTaskbarTheme() {
+    // タスクバーは GetIcon が返したアイコンをキャッシュし、OnUpdate が来たときだけ描き直す。
+    // テーマ (明暗) が変わったら OnUpdate を出し、新しい色のアイコンに差し替えてもらう。変わっていなければ何もしない
+    if (langBar_ == nullptr) return;
+    bool dark = TaskbarIsDark();
+    if (dark == taskbarDark_) return;
+    taskbarDark_ = dark;
+    UpdateLangBar();
+}
+
 // ---- キー ----
 
 bool TextService::ContextDisabled(ITfContext* context) {
@@ -738,11 +748,18 @@ LRESULT CALLBACK TextService::HelloWindowProc(HWND window, UINT message, WPARAM 
         SetWindowLongPtrW(window, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(create->lpCreateParams));
     }
     auto self = reinterpret_cast<TextService*>(GetWindowLongPtrW(window, GWLP_USERDATA));
-    if (message == WM_TIMER && self) { self->Hello(); return 0; }
+    if (message == WM_TIMER && self) {
+        // テーマ変更の追従は常駐側の応答に依らないので、Hello の前に見る (Meltype.exe が落ちていてもアイコンの色は直す)
+        self->RefreshTaskbarTheme();
+        self->Hello();
+        return 0;
+    }
     return DefWindowProcW(window, message, wParam, lParam);
 }
 
 void TextService::StartHelloUpdates() {
+    // 今のテーマを覚えておく (langBar_ の最初のアイコンもこの明暗で描かれる)。以後、変わったら描き直す
+    taskbarDark_ = TaskbarIsDark();
     WNDCLASSW cls{};
     cls.lpfnWndProc = HelloWindowProc;
     cls.hInstance = g_module;

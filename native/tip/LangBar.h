@@ -11,6 +11,14 @@ namespace meltype {
 
 class TextService;
 
+// タスクバーに出す入力モードのアイコン (japanese なら「あ」、そうでなければ「A」) を作る。Microsoft IME の表示と同じ絵にする。
+// size は 1 辺のピクセル数。dark ならタスクバーが暗いので白い文字、そうでなければ黒。
+// 作れなければ nullptr。使い終わったら DestroyIcon する (GetIcon で返したものはタスクバーがする)
+HICON CreateInputModeIcon(bool japanese, int size, bool dark);
+
+// タスクバーが暗い (ダークモード) か。GetIcon が描くアイコンの色と、テーマ変更の検知 (TextService) に使う
+bool TaskbarIsDark();
+
 class LangBarButton final : public ITfLangBarItemButton, public ITfSource {
 public:
     explicit LangBarButton(TextService* service);

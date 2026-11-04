@@ -11,6 +11,9 @@
 
 #include "Globals.h"
 
+struct ID2D1Factory;
+struct IDWriteFactory;
+
 namespace meltype {
 
 struct CandidateView {
@@ -42,6 +45,9 @@ public:
     static void UnregisterClasses();
     // DllCanUnloadNow で S_OK を返すときに呼ぶ。DllMain からは呼ばない
     static void ReleaseFactories();
+    // Direct2D / DirectWrite のファクトリーを貸す (タスクバーの「あ / A」のアイコンも同じものを使う)。作れなければ false。
+    // 返したものは Release しない (ReleaseFactories で解放する。TextService が残っている間は解放されない)
+    static bool SharedFactories(ID2D1Factory** d2d, IDWriteFactory** dwrite);
 
     struct Impl;
 

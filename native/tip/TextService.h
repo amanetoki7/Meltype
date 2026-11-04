@@ -147,6 +147,10 @@ private:
     std::string CommitRequest(bool moved) const;
     void UnadviseTextEditSink();
     void UpdateLangBar();
+    // タスクバーのテーマ (明暗) が変わっていたらアイコンを描き直す。各スレッドの Hello のタイマーから定期的に呼ぶ:
+    // タスクバーのアイコンはモードが変わったときにしか描き直されないので、テーマだけ変えると、
+    // そのスレッドが最後に描いた色のまま残る (背景の入力欄にフォーカスを戻すと前の色に見える)。
+    void RefreshTaskbarTheme();
     // 明示的に入力モードを切り替えたとき、常駐側の「あ / A」を一瞬表示する。
     void FlashModeIndicator(ITfContext* context = nullptr);
 
@@ -241,6 +245,7 @@ private:
 
     std::unique_ptr<CandidateWindow> candidates_;
     LangBarButton* langBar_ = nullptr;
+    bool taskbarDark_ = false;     // 前にアイコンを描いたときのタスクバーの明暗 (StartHelloUpdates で今の値にする)
 };
 
 // ITfEditSession を関数で作る

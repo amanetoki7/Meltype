@@ -42,6 +42,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File native/tip/tests/build-mode-
 native/tip/bin/tests/ModeIndicatorEvents.exe
 ```
 
+タスクバーの「あ / A」のアイコンの確認は次で行えます (ウィンドウは出ません)。アイコンの形式 (32 ビット・乗算済みアルファ・マスク)、色 (明るいテーマは黒の 89%、暗いテーマは白)、グリフがアイコンの高さいっぱいに描かれること、Segoe Fluent Icons があるときは実機の Microsoft IME の表示 (16×16 の濃さ) との差が小さいことを確かめます。
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File native/tip/tests/build-input-mode-icon-test.ps1
+native/tip/bin/tests/InputModeIcon.exe
+```
+
 `--tip-e2e` の制約: Windows は、人のキーボード操作がしばらく無い状態だと、プログラムが送り込んだキー (SendInput) も、TSF のキー処理を直接呼んだキー (ITfKeystrokeMgr) も、IME に渡さない。
 このときは TSF の状態がすべて正常なのに、IME のキー処理が呼ばれず、英字のまま入る。人が操作している間に流すと通る。
 IME を変えたときは、このテストに加えて、メモ帳などで実際に打って確かめる。
@@ -62,6 +69,7 @@ TSF の IME は、入力するアプリ全部のプロセスに読み込まれ�
 | ITfCompositionSink | アプリの側が変換中の文字を確定したとき (打っている途中で、キャレットがその後ろのままなら、次のキーで変換中に戻して続ける。空のノートに最初の文字を入れたときに、アプリが入力欄を作り直して確定することがあるため) |
 | ITfDisplayAttributeProvider | 下線の種類 (打っている途中は点線、変換した文節は細線、選んでいる文節は太線) |
 | ITfCompartmentEventSink | 日本語 ⇔ 英数 (IME の ON/OFF)。半角/全角 と、タスクバーの「あ / A」のボタン (ITfLangBarItemButton) で切り替える |
+| ITfLangBarItemButton (LangBar.cpp) | タスクバーの「あ / A」。アイコンは `CreateInputModeIcon` が DirectWrite で描く。Segoe Fluent Icons のグリフ (U+E986 / U+E97E) と標準の文字色で描画する。Segoe Fluent Icons が無ければ Segoe MDL2 Assets、それも無ければ Yu Gothic UI の Bold の文字。ファクトリーは候補の一覧と共用 (`CandidateWindow::SharedFactories`) |
 
 ゲームなど、候補を自分で描くアプリ向けの UILess (ITfCandidateListUIElement) には対応していない。
 
